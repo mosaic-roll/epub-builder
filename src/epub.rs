@@ -954,7 +954,13 @@ impl<Z: Zip> EpubBuilder<Z> {
     fn render_nav(&mut self, numbered: bool) -> Result<Vec<u8>> {
         let content = self.toc.render(numbered, self.escape_html);
         let mut landmarks: Vec<String> = Vec::new();
-        if self.version > EpubVersion::V20 {
+        // NOTE: `render_nav` is only used by `nav.xhtml` and `toc.xhtml`.
+        // `numbered` selects `<ol>` vs `<ul>` for the TOC list,
+        // happens to be `true` for `nav.xhtml` and `false` for `toc.xhtml`,
+        // so it can be used to distinguish the two callers.
+        // Landmarks belong to the navigation document only,
+        // and must not appear in `toc.xhtml`.
+        if numbered && self.version > EpubVersion::V20 {
             for file in &self.files {
                 if let Some(ref reftype) = file.reftype {
                     use ReferenceType::*;
