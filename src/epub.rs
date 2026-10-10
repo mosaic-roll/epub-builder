@@ -935,9 +935,11 @@ impl<Z: Zip> EpubBuilder<Z> {
 
         nav_points.push_str(&self.toc.render_epub(self.escape_html));
 
+        let depth = toc_depth(&self.toc.elements);
         let data = upon::value! {
             title: common::encode_html(&self.metadata.title, self.escape_html),
-            nav_points: nav_points
+            nav_points: nav_points,
+            depth: depth.to_string(),
         };
         let mut res: Vec<u8> = vec![];
         templates::TOC_NCX
@@ -1046,6 +1048,16 @@ fn is_id_char(c: char) -> bool {
         || c == '\u{B7}'
         || ('\u{0300}'..='\u{036F}').contains(&c)
         || ('\u{203F}'..='\u{2040}').contains(&c)
+}
+
+/// Return the maximum nesting depth of the given toc elements.
+/// Returns 0 for an empty slice.
+fn toc_depth(elements: &[TocElement]) -> u32 {
+    elements
+        .iter()
+        .map(|e| 1 + toc_depth(&e.children))
+        .max()
+        .unwrap_or(0)
 }
 
 // generate an id compatible string, replacing all none ID chars to underscores
