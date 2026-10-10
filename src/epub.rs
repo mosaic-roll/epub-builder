@@ -108,7 +108,7 @@ impl MetadataOpfV3 {
 
     /// Add refines metadata
     pub fn add_refines(&mut self, refines: String) -> &mut Self {
-        self.id = Some(refines);
+        self.refines = Some(refines);
         self
     }
 
