@@ -186,7 +186,7 @@ impl MetadataOpf {
     /// Create new instance
     /// 
     /// 
-    pub fn new(&self, meta_name: String, meta_content: String) -> Self {
+    pub fn new(meta_name: String, meta_content: String) -> Self {
         Self { name: meta_name, content: meta_content }
     }
 }
