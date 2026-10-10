@@ -6,7 +6,7 @@
     <meta name="dtb:maxPageNumber" content="0" />
   </head>
   <docTitle>
-    <text>{{toc_name}}</text>
+    <text>{{title}}</text>
   </docTitle>
   <navMap>
 {{nav_points}}

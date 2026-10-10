@@ -936,7 +936,7 @@ impl<Z: Zip> EpubBuilder<Z> {
         nav_points.push_str(&self.toc.render_epub(self.escape_html));
 
         let data = upon::value! {
-            toc_name: common::encode_html(&self.metadata.toc_name, self.escape_html),
+            title: common::encode_html(&self.metadata.title, self.escape_html),
             nav_points: nav_points
         };
         let mut res: Vec<u8> = vec![];
