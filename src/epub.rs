@@ -751,6 +751,10 @@ impl<Z: Zip> EpubBuilder<Z> {
     /// builder.generate(&mut epub).unwrap();
     /// ```
     pub fn generate<W: io::Write>(mut self, to: W) -> Result<()> {
+        // Resolve uuid once; OPF (dc:identifier) and NCX (dtb:uid) must match.
+        if self.metadata.uuid.is_none() {
+            self.metadata.uuid = Some(uuid::Uuid::new_v4());
+        }
         // If no styleesheet was provided, generate a dummy one
         if !self.stylesheet {
             self.stylesheet(b"".as_ref())?;
@@ -810,7 +814,7 @@ impl<Z: Zip> EpubBuilder<Z> {
             .metadata
             .date_published
             .map(|date| date.format("%Y-%m-%dT%H:%M:%SZ"));
-        let uuid = uuid::fmt::Urn::from_uuid(self.metadata.uuid.unwrap_or_else(uuid::Uuid::new_v4))
+        let uuid = uuid::fmt::Urn::from_uuid(self.metadata.uuid.expect("generate sets uuid"))
             .to_string();
 
         let mut items: Vec<String> = Vec::new();
@@ -936,10 +940,13 @@ impl<Z: Zip> EpubBuilder<Z> {
         nav_points.push_str(&self.toc.render_epub(self.escape_html));
 
         let depth = toc_depth(&self.toc.elements);
+        let uuid = uuid::fmt::Urn::from_uuid(self.metadata.uuid.expect("generate sets uuid"))
+            .to_string();
         let data = upon::value! {
             title: common::encode_html(&self.metadata.title, self.escape_html),
             nav_points: nav_points,
             depth: depth.to_string(),
+            uuid: html_escape::encode_double_quoted_attribute(&uuid),
         };
         let mut res: Vec<u8> = vec![];
         templates::TOC_NCX
