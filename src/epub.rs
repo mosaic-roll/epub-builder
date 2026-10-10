@@ -762,11 +762,11 @@ impl<Z: Zip> EpubBuilder<Z> {
         let bytes = self.render_toc()?;
         self.zip.write_file("OEBPS/toc.ncx", &*bytes)?;
         // Render nav.xhtml
-        let bytes = self.render_nav(true)?;
+        let bytes = self.render_nav(true, true)?;
         self.zip.write_file("OEBPS/nav.xhtml", &*bytes)?;
         // Write inline toc if it needs to
         if self.inline_toc {
-            let bytes = self.render_nav(false)?;
+            let bytes = self.render_nav(false, false)?;
             self.zip.write_file("OEBPS/toc.xhtml", &*bytes)?;
         }
 
@@ -951,16 +951,10 @@ impl<Z: Zip> EpubBuilder<Z> {
     }
 
     /// Render nav.xhtml
-    fn render_nav(&mut self, numbered: bool) -> Result<Vec<u8>> {
+    fn render_nav(&mut self, numbered: bool, show_landmarks: bool) -> Result<Vec<u8>> {
         let content = self.toc.render(numbered, self.escape_html);
         let mut landmarks: Vec<String> = Vec::new();
-        // NOTE: `render_nav` is only used by `nav.xhtml` and `toc.xhtml`.
-        // `numbered` selects `<ol>` vs `<ul>` for the TOC list,
-        // happens to be `true` for `nav.xhtml` and `false` for `toc.xhtml`,
-        // so it can be used to distinguish the two callers.
-        // Landmarks belong to the navigation document only,
-        // and must not appear in `toc.xhtml`.
-        if numbered && self.version > EpubVersion::V20 {
+        if show_landmarks && self.version > EpubVersion::V20 {
             for file in &self.files {
                 if let Some(ref reftype) = file.reftype {
                     use ReferenceType::*;
