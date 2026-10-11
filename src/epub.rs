@@ -449,7 +449,6 @@ impl<Z: Zip> EpubBuilder<Z> {
                     self.metadata.lang.push(value.into())
                 }
             }
-            "direction" => self.direction = PageDirection::from_str(&value.into())?,
             "generator" => self.metadata.generator = value.into(),
             "description" => {
                 let value = value.into();
